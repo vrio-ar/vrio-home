@@ -1,37 +1,31 @@
 "use client";
 
-import { useRef, useMemo, useState } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { Float } from "@react-three/drei";
 import * as THREE from "three";
 import { easing } from "maath";
 
-// Geometry constants for the V shape
-// We will create 3 main segments for the triangle/V shape
-// 1. Left diagonal
-// 2. Right diagonal
-// 3. Top bar (optional, based on the logo description "Triangular shapes")
-// The logo is a Triangle pointing down.
-// Let's create it out of multiple "shards" (instanced or individual meshes)
-
-const GOLD_MATERIAL = new THREE.MeshStandardMaterial({
+const GOLD_MATERIAL = new THREE.MeshPhysicalMaterial({
     color: "#FFC400",
-    roughness: 0.3,
-    metalness: 1.0,
-});
-
-const BLUE_MATERIAL = new THREE.MeshStandardMaterial({
-    color: "#050914",
-    roughness: 0.1,
-});
-
-const HOLOGRAPHIC_MATERIAL = new THREE.MeshPhysicalMaterial({
-    color: "#FFFFFF",
-    emissive: "#00FFFF", // Cyan tint for holographic feel
-    emissiveIntensity: 2.0,
     roughness: 0.2,
-    metalness: 0.8,
-    transmission: 0.1, // Slight transparency
-    thickness: 1,
+    metalness: 1.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.1,
+    reflectivity: 1.0,
+});
+
+const MATTE_BLACK_MATERIAL = new THREE.MeshStandardMaterial({
+    color: "#0a0a0a",
+    roughness: 0.9,
+    metalness: 0.1,
+});
+
+const EMISSIVE_WHITE_MATERIAL = new THREE.MeshStandardMaterial({
+    color: "#FFFFFF",
+    emissive: "#FFFFFF",
+    emissiveIntensity: 3, // Boosted intensity for Bloom
+    toneMapped: false,
 });
 
 function Shard({
@@ -39,109 +33,84 @@ function Shard({
     rotation,
     scale,
     material,
-    delay = 0,
-    hovered,
+    mouse,
+    trackingIntensity = 0.5,
 }: {
     position: [number, number, number];
     rotation: [number, number, number];
     scale: [number, number, number];
     material: THREE.Material;
-    delay?: number;
-    hovered: boolean;
+    mouse: React.MutableRefObject<THREE.Vector2>;
+    trackingIntensity?: number;
 }) {
     const mesh = useRef<THREE.Mesh>(null);
-
-    // Random start position for "dispersed" state
-    const startPos = useMemo(() => {
-        return [
-            (Math.random() - 0.5) * 15,
-            (Math.random() - 0.5) * 15,
-            (Math.random() - 0.5) * 10,
-        ] as [number, number, number];
-    }, []);
-
-    const startRot = useMemo(() => {
-        return [
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-            Math.random() * Math.PI * 2,
-        ] as [number, number, number];
-    }, []);
 
     useFrame((state, delta) => {
         if (!mesh.current) return;
 
-        // Target state
-        const targetPos = hovered ? position : startPos;
-        const targetRot = hovered ? rotation : startRot;
+        // Proximity calculation: Distance from center of screen (0,0)
+        // Mouse coords are -1 to 1.
+        const dist = Math.sqrt(state.pointer.x ** 2 + state.pointer.y ** 2);
 
-        // Magnetic easing
-        // damp3(current, target, smoothTime, delta)
-        easing.damp3(mesh.current.position, targetPos, hovered ? 0.3 : 1.5, delta);
-        easing.dampE(mesh.current.rotation, targetRot, hovered ? 0.4 : 1.2, delta);
+        // Proximity Factor: 1.0 when center, 0.2 when far (Idle movement)
+        // This ensures the logo is always "alive" even on desktop when mouse is away
+        const proximityFactor = Math.max(0.2, 1 - dist * 1.5);
+
+        // Base rotation + tracking
+        // Added a constant base rotation to the time component so it always drifts
+        const targetRotX = rotation[0] + (state.pointer.y * trackingIntensity * 0.3) + (state.clock.elapsedTime * proximityFactor * 0.5);
+        const targetRotY = rotation[1] + (state.pointer.x * trackingIntensity * 0.3) + (state.clock.elapsedTime * proximityFactor * 0.5);
+
+        // Smoothly damp to target
+        easing.dampE(mesh.current.rotation, [targetRotX, targetRotY, rotation[2]], 0.1, delta);
     });
 
     return (
-        <mesh ref={mesh} material={material} scale={scale}>
-            {/* Utilizing Cylinder for "prism" feel with 3 sides */}
-            <cylinderGeometry args={[0.2, 0.5, 3, 3]} />
-        </mesh>
+        <Float rotationIntensity={0.2} floatIntensity={0.5} speed={2}>
+            <mesh ref={mesh} position={position} scale={scale} material={material}>
+                <boxGeometry args={[1, 1, 1]} />
+            </mesh>
+        </Float>
     );
 }
 
 export function VrioLogo() {
-    const [hovered, setHovered] = useState(false);
+    const mouse = useRef(new THREE.Vector2());
 
-    // Define the shards that make up the triangle logo
-    // This is a simplified artistic interpretation of the provided logo
-    // 1. Center V (Gold + Blue)
-    // 2. Outer V (White)
+    useFrame((state) => {
+        mouse.current.copy(state.pointer);
+    });
 
     return (
-        <group
-            onPointerOver={() => setHovered(true)}
-            onPointerOut={() => setHovered(false)}
-        >
-            {/* Left Leg of V - Gold */}
+        <group position={[0, 0, 0]}>
+            {/* Shard 1: Premium Gold - Left Diagonal */}
             <Shard
-                position={[-1.5, 0, 0]}
-                rotation={[0, 0, Math.PI / 6]}
-                scale={[1, 1, 1]}
+                position={[-1.2, 0, 0]}
+                rotation={[0, 0, Math.PI / 8]}
+                scale={[0.8, 3.5, 0.5]}
                 material={GOLD_MATERIAL}
-                hovered={hovered}
-            />
-            {/* Right Leg of V - Blue */}
-            <Shard
-                position={[1.5, 0, 0]}
-                rotation={[0, 0, -Math.PI / 6]}
-                scale={[1, 1, 1]}
-                material={BLUE_MATERIAL}
-                hovered={hovered}
+                mouse={mouse}
+                trackingIntensity={0.8}
             />
 
-            {/* Top Bar - Holographic White (The "cap" of the triangle) */}
+            {/* Shard 2: Matte Black - Right Diagonal (Behind/Offset) */}
             <Shard
-                position={[0, 2.8, 0]}
+                position={[1.2, 0, -0.5]}
+                rotation={[0, 0, -Math.PI / 8]}
+                scale={[0.8, 3.5, 0.5]}
+                material={MATTE_BLACK_MATERIAL}
+                mouse={mouse}
+                trackingIntensity={0.6}
+            />
+
+            {/* Shard 3: Emissive White - Top Connector / Float element */}
+            <Shard
+                position={[0, 1.5, 0.5]}
                 rotation={[0, 0, Math.PI / 2]}
-                scale={[1, 1.2, 1]} // Make it wider
-                material={HOLOGRAPHIC_MATERIAL}
-                hovered={hovered}
-            />
-
-            {/* Additional Details / Shards for complexity */}
-            <Shard
-                position={[-0.8, 1, 0.5]}
-                rotation={[0, 0, Math.PI / 6]}
-                scale={[0.5, 0.5, 0.5]}
-                material={HOLOGRAPHIC_MATERIAL}
-                hovered={hovered}
-            />
-            <Shard
-                position={[0.8, 1, -0.5]}
-                rotation={[0, 0, -Math.PI / 6]}
-                scale={[0.5, 0.5, 0.5]}
-                material={GOLD_MATERIAL}
-                hovered={hovered}
+                scale={[0.5, 2.5, 0.2]}
+                material={EMISSIVE_WHITE_MATERIAL}
+                mouse={mouse}
+                trackingIntensity={1.0}
             />
         </group>
     );

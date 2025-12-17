@@ -5,69 +5,85 @@ import { motion } from "framer-motion";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-function GlitchText({ text, speed = 30 }: { text: string; speed?: number }) {
+function GlitchText({ text, active }: { text: string; active: boolean }) {
     const [displayText, setDisplayText] = useState(text);
-    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
-
-        if (isHovered) {
+        if (active) {
+            let iteration = 0;
             interval = setInterval(() => {
                 setDisplayText(
                     text
                         .split("")
                         .map((char, index) => {
-                            if (char === " ") return " ";
+                            if (index < iteration) return text[index];
                             return CHARS[Math.floor(Math.random() * CHARS.length)];
                         })
                         .join("")
                 );
-            }, speed);
+                iteration += 1 / 2; // Speed of decoding
+                if (iteration >= text.length) {
+                    clearInterval(interval);
+                    setDisplayText(text); // Ensure final text is correct
+                }
+            }, 30);
         } else {
             setDisplayText(text);
         }
-
         return () => clearInterval(interval);
-    }, [isHovered, text, speed]);
+    }, [active, text]);
 
-    return (
-        <span
-            className="cursor-pointer hover:text-industrial-gold transition-colors duration-100"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {displayText}
-        </span>
-    );
+    return <span>{displayText}</span>;
 }
 
 export function BusinessSolutionsHUD() {
-    const services = ["PROCESS EVOLUTION", "CREATIVE ENGINEERING", "DISRUPTIVE STRATEGY", "SYSTEM ARCHITECTURE"];
+    const services = [
+        "Evolución de Procesos",
+        "Ingeniería Creativa",
+        "Estrategia Disruptiva",
+        "Arquitectura de Sistemas"
+    ];
 
     return (
-        <div className="absolute top-0 right-0 w-80 h-full p-8 flex flex-col justify-center pointer-events-none z-10 font-mono text-sm">
-            <div className="pointer-events-auto bg-void-blue/80 backdrop-blur-md border-l-2 border-industrial-gold p-6 rounded-sm shadow-lg shadow-industrial-gold/20">
-                <h3 className="text-industrial-gold mb-4 text-xs tracking-[0.2em] border-b border-white/10 pb-2">
-                    SYSTEM_MODULES // V 2.0.4
+        <div className="relative w-full md:absolute md:top-0 md:right-0 md:w-96 md:h-full p-6 md:p-12 flex flex-col justify-center pointer-events-none z-10 font-mono text-sm order-1 md:order-none">
+            <div className="pointer-events-auto bg-void-blue/90 backdrop-blur-xl border-t-2 md:border-t-0 md:border-l-2 border-industrial-gold/50 p-6 md:p-8 rounded-sm shadow-2xl shadow-black/50 w-full">
+                <h3 className="text-industrial-gold mb-8 text-xs tracking-[0.3em] border-b border-white/10 pb-4">
+                    SOLUCIONES DE NEGOCIO // V 2.1.0
                 </h3>
-                <ul className="space-y-4">
+                <ul className="space-y-6">
                     {services.map((service) => (
-                        <li key={service} className="tracking-widest opacity-80 hover:opacity-100">
-                            <span className="text-industrial-gold mr-2">{">"}</span>
-                            <GlitchText text={service} />
-                        </li>
+                        <MenuItem key={service} text={service} />
                     ))}
                 </ul>
 
-                <div className="mt-8 text-[10px] text-white/40 leading-relaxed">
-                    RUNNING DIAGNOSTICS...
+                <div className="mt-12 text-[10px] text-white/30 leading-relaxed font-light tracking-wider">
+                    :: DIAGNÓSTICO DEL SISTEMA... OK
                     <br />
-                    OPTIMIZING NEURAL PATHWAYS...
+                    :: OPTIMIZACIÓN NEURONAL... ACTIVADA
                     <br />
-                    ESTABLISHING SECURE CONNECTION...
+                    :: ENLACE SEGURO... ESTABLECIDO
                 </div>
             </div>
         </div>
+    );
+}
+
+function MenuItem({ text }: { text: string }) {
+    const [hovered, setHovered] = useState(false);
+
+    return (
+        <li
+            className="cursor-pointer group flex items-center transition-all duration-300"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            <span className={`mr-3 transition-colors duration-300 ${hovered ? "text-[#00F0FF]" : "text-industrial-gold/50"}`}>
+                {hovered ? ">" : "+"}
+            </span>
+            <div className={`tracking-widest uppercase transition-colors duration-300 ${hovered ? "text-[#00F0FF] drop-shadow-[0_0_5px_rgba(0,240,255,0.8)]" : "text-white/80"}`}>
+                <GlitchText text={text} active={hovered} />
+            </div>
+        </li>
     );
 }
