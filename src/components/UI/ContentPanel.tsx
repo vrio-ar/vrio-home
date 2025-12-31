@@ -42,7 +42,7 @@ function DecodingText({ text, active, delay = 0 }: { text: string; active: boole
 const SECTION_CONTENT: Record<string, { title: string; body: string; tags: string[] } | null> = {
     HOME: null,
     PROCESS: {
-        title: "TRANSFORMACIÓN RADICAL",
+        title: "NUEVOS PARADIGMAS",
         body: "No optimizamos. Reimaginamos. Creamos nuevas formas de interactuar, comerciar y comunicar donde la tecnología desaparece y solo queda la experiencia.",
         tags: ["NUEVAS FORMAS", "REIMAGINAR", "EXPERIENCIA PURA"]
     },

@@ -39,7 +39,7 @@ function GlitchText({ text, active }: { text: string; active: boolean }) {
 }
 
 const NAV_ITEMS = [
-    { label: "Transformación Radical", section: "PROCESS" },
+    { label: "Nuevos Paradigmas", section: "PROCESS" },
     { label: "Ingeniería Creativa", section: "CREATIVE" },
     { label: "Estrategia Disruptiva", section: "STRATEGY" },
     { label: "Artesanía de Sistemas", section: "SYSTEMS" }
