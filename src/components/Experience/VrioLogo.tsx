@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Float, MeshTransmissionMaterial, Environment } from "@react-three/drei";
 import * as THREE from "three";
 import { easing } from "maath";
+import { useNavigationStore } from "@/store/useNavigationStore";
 
 // Previous materials kept as comments for reversibility/reference
 /*
@@ -22,6 +23,8 @@ const EMISSIVE_WHITE_MATERIAL = new THREE.MeshStandardMaterial({ ... });
 const CORE_LIGHT_MATERIAL = new THREE.MeshBasicMaterial({
     color: "#00F0FF", // Cyan Neon
     toneMapped: false,
+    transparent: true,
+    opacity: 1,
 });
 
 function CrystalShard({
@@ -72,6 +75,8 @@ function CrystalShard({
                     temporalDistortion={0.1}
                     color={color}
                     reflectivity={0.5}
+                    transparent={true}
+                    opacity={1}
                 />
             </mesh>
         </Float>
@@ -108,13 +113,28 @@ function CoreLight({
 
 export function VrioLogo() {
     const mouse = useRef(new THREE.Vector2());
+    const groupRef = useRef<THREE.Group>(null);
+    const logoVisible = useNavigationStore((state) => state.logoVisible);
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         mouse.current.copy(state.pointer);
+
+        // Smooth opacity transition
+        if (groupRef.current) {
+            const targetOpacity = logoVisible ? 1 : 0;
+            groupRef.current.traverse((child) => {
+                if ('material' in child && child.material) {
+                    const material = child.material as any;
+                    if (material.opacity !== undefined) {
+                        material.opacity += (targetOpacity - material.opacity) * delta * 3;
+                    }
+                }
+            });
+        }
     });
 
     return (
-        <group position={[0, 0, 0]}>
+        <group ref={groupRef} position={[0, 0, 0]}>
             <Environment preset="city" />
 
             {/* Shard 1: Prism - Left V Leg */}

@@ -47,6 +47,7 @@ const NAV_ITEMS = [
 
 export function BusinessSolutionsHUD() {
     const setActiveSection = useNavigationStore((state) => state.setActiveSection);
+    const toggleLogoVisibility = useNavigationStore((state) => state.toggleLogoVisibility);
 
     return (
         <div className="relative w-full md:absolute md:top-0 md:right-0 md:w-96 md:h-full px-6 pb-6 pt-2 md:p-12 flex flex-col justify-center pointer-events-none z-10 font-mono text-sm order-1 md:order-none">
@@ -64,8 +65,16 @@ export function BusinessSolutionsHUD() {
                     ))}
                 </ul>
 
-                <div className="mt-12 text-[10px] text-white/40 leading-relaxed font-light tracking-[0.25em] italic">
+                <div className="mt-12 text-[10px] text-white/40 leading-relaxed font-light tracking-[0.25em] italic flex items-center gap-2">
                     :: TECNOLOGÍA INVISIBLE
+                    <button
+                        onClick={toggleLogoVisibility}
+                        className="w-3 h-3 cursor-pointer opacity-0 hover:opacity-40 transition-opacity duration-300"
+                        aria-label="Toggle logo visibility"
+                        title="Click to experience invisible technology"
+                    >
+                        <span className="text-[8px]">👁</span>
+                    </button>
                 </div>
             </div>
         </div>
