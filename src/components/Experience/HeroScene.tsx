@@ -1,10 +1,12 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Environment, Float, Stars } from "@react-three/drei";
+import { Environment, Float } from "@react-three/drei";
 import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
 import { VrioLogo } from "./VrioLogo";
 import { CameraController } from "./CameraController";
+import { TravelingLight } from "./TravelingLight";
+import { StarField } from "./StarField";
 
 export function HeroScene() {
     return (
@@ -41,7 +43,10 @@ export function HeroScene() {
                     <VrioLogo />
                 </group>
 
-                <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                <StarField />
+
+                {/* Mysterious traveling light */}
+                <TravelingLight />
 
                 {/* Post Processing */}
                 <EffectComposer>
