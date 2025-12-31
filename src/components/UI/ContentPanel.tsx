@@ -42,9 +42,9 @@ function DecodingText({ text, active, delay = 0 }: { text: string; active: boole
 const SECTION_CONTENT: Record<string, { title: string; body: string; tags: string[] } | null> = {
     HOME: null,
     PROCESS: {
-        title: "DISRUPCIÓN INVISIBLE",
-        body: "No optimizamos. Reimaginamos. Creamos nuevas formas de interactuar, comerciar y comunicar donde la tecnología desaparece y solo queda la experiencia. Como un truco de magia perfectamente ejecutado.",
-        tags: ["MAGIA INVISIBLE", "NUEVAS FORMAS", "EXPERIENCIA PURA"]
+        title: "TRANSFORMACIÓN RADICAL",
+        body: "No optimizamos. Reimaginamos. Creamos nuevas formas de interactuar, comerciar y comunicar donde la tecnología desaparece y solo queda la experiencia.",
+        tags: ["NUEVAS FORMAS", "REIMAGINAR", "EXPERIENCIA PURA"]
     },
     CREATIVE: {
         title: "INGENIERÍA CREATIVA",
@@ -53,7 +53,7 @@ const SECTION_CONTENT: Record<string, { title: string; body: string; tags: strin
     },
     STRATEGY: {
         title: "ESTRATEGIA DISRUPTIVA",
-        body: "Identificamos lo que otros no ven. Creamos productos que no existían. Transformamos industrias completas haciendo que lo imposible sea invisible, natural, inevitable.",
+        body: "Identificamos lo que otros no ven. Creamos productos que no existían. Transformamos industrias completas haciendo que lo imposible sea natural, fluido, inevitable.",
         tags: ["PRODUCTOS NUEVOS", "VISIÓN PROFUNDA", "LO INEVITABLE"]
     },
     SYSTEMS: {
